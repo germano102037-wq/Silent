@@ -26,7 +26,6 @@
             min-height: 100vh;
         }
 
-        /* Background de Partículas */
         #canvas-bg {
             position: fixed;
             top: 0;
@@ -43,9 +42,16 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        /* Efeito Scramble no Título */
+        /* Classe para esconder as seções */
+        .hidden {
+            display: none !important;
+            opacity: 0;
+            pointer-events: none;
+        }
+
         .title-wrapper {
             text-align: center;
             margin-bottom: 50px;
@@ -68,7 +74,6 @@
             line-height: 1.6;
         }
 
-        /* Grid de Cards Ultra-Modernos */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -96,7 +101,7 @@
             font-size: 1.5rem;
             margin-bottom: 15px;
             color: var(--primary);
-            transform: translateZ(30px); /* Efeito 3D */
+            transform: translateZ(30px);
         }
 
         .card p {
@@ -105,7 +110,6 @@
             transform: translateZ(20px);
         }
 
-        /* Botão com Glow Animado */
         .btn-wrap {
             margin-top: 60px;
             position: relative;
@@ -124,6 +128,8 @@
             transition: 0.3s;
             overflow: hidden;
             display: inline-block;
+            border: none;
+            cursor: pointer;
         }
 
         .btn:hover {
@@ -131,7 +137,18 @@
             box-shadow: 0 0 50px rgba(0, 242, 254, 0.6);
         }
 
-        /* Animação de entrada */
+        /* Estilo da Seção de Agradecimento */
+        #thanks-section {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        #thanks-section h2 {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
         .reveal {
             opacity: 0;
             transform: translateY(30px);
@@ -141,14 +158,13 @@
         @keyframes fadeInUp {
             to { opacity: 1; transform: translateY(0); }
         }
-
     </style>
 </head>
 <body>
 
     <canvas id="canvas-bg"></canvas>
 
-    <div class="container">
+    <div id="main-content" class="container">
         <div class="title-wrapper reveal">
             <h1 id="scramble-text">DEVELOPER PRO</h1>
             <p class="subtitle">Especialista em criar experiências digitais de alto impacto. Código limpo, performance extrema e disponibilidade 24/7.</p>
@@ -170,12 +186,20 @@
         </div>
 
         <div class="btn-wrap reveal" style="animation-delay: 0.6s;">
-            <a href="#" class="btn">Me Contrate Agora</a>
+            <button onclick="showThanks()" class="btn">Me Contrate Agora</button>
+        </div>
+    </div>
+
+    <div id="thanks-section" class="container hidden">
+        <h2 id="scramble-thanks">OBRIGADO!</h2>
+        <p class="subtitle">Sua solicitação foi recebida com sucesso. Prepare-se para elevar o nível do seu projeto. Entrarei em contato em breve.</p>
+        <div class="btn-wrap">
+            <a href="javascript:location.reload()" class="btn" style="background: transparent; color: white; border: 1px solid white;">Voltar</a>
         </div>
     </div>
 
     <script>
-        // --- 1. Sistema de Partículas (Background) ---
+        // --- 1. Sistema de Partículas ---
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -210,6 +234,7 @@
         }
 
         function createParticles() {
+            particles = [];
             for (let i = 0; i < 100; i++) {
                 particles.push(new Particle());
             }
@@ -229,16 +254,29 @@
         animate();
         window.addEventListener('resize', initCanvas);
 
-        // --- 2. Efeito Scramble (Texto Decodificando) ---
-        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        let interval = null;
+        // --- 2. Função de Transição para Agradecimento ---
+        function showThanks() {
+            const main = document.getElementById('main-content');
+            const thanks = document.getElementById('thanks-section');
 
+            // Fade out
+            main.style.opacity = '0';
+            main.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                main.classList.add('hidden');
+                thanks.classList.remove('hidden');
+                // Aplica o efeito de scramble no título de agradecimento
+                scramble(document.getElementById('scramble-thanks'));
+            }, 500);
+        }
+
+        // --- 3. Efeito Scramble ---
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         function scramble(element) {
             let iteration = 0;
-            clearInterval(interval);
             const originalText = element.innerText;
-            
-            interval = setInterval(() => {
+            const interval = setInterval(() => {
                 element.innerText = element.innerText
                 .split("")
                 .map((letter, index) => {
@@ -254,18 +292,15 @@
 
         window.onload = () => scramble(document.getElementById('scramble-text'));
 
-        // --- 3. Efeito Tilt 3D nos Cards ---
+        // --- 4. Efeito Tilt 3D ---
         function handleTilt(e, card) {
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
-            
             const rotateX = (y - centerY) / 10;
             const rotateY = (centerX - x) / 10;
-            
             card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         }
 
