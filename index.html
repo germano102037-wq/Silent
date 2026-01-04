@@ -181,7 +181,6 @@
     </div>
 
     <script>
-        // --- 1. Background de Partículas ---
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -222,7 +221,6 @@
         initCanvas(); animate();
         window.addEventListener('resize', initCanvas);
 
-        // --- 2. Troca de Tela ---
         function showThanks() {
             const main = document.getElementById('main-content');
             const thanks = document.getElementById('thanks-section');
@@ -234,7 +232,6 @@
             }, 500);
         }
 
-        // --- 3. Efeito Scramble ---
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         function scramble(element) {
             let iteration = 0;
@@ -251,7 +248,6 @@
 
         window.onload = () => scramble(document.getElementById('scramble-text'));
 
-        // --- 4. Efeito Tilt ---
         function handleTilt(e, card) {
             const rect = card.getBoundingClientRect();
             const x = (e.clientX - rect.left) - rect.width / 2;
