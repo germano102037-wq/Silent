@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Ultra | Portfolio</title>
+    <style>
+        :root {
+            --primary: #00f2fe;
+            --secondary: #7000ff;
+            --bg: #050505;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Background de Partículas */
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Efeito Scramble no Título */
+        .title-wrapper {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #888;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        /* Grid de Cards Ultra-Modernos */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            width: 100%;
+            perspective: 1000px;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 24px;
+            transition: transform 0.1s ease, border-color 0.3s ease;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            transform: translateZ(30px); /* Efeito 3D */
+        }
+
+        .card p {
+            color: #ccc;
+            line-height: 1.6;
+            transform: translateZ(20px);
+        }
+
+        /* Botão com Glow Animado */
+        .btn-wrap {
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .btn {
+            position: relative;
+            padding: 20px 50px;
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            font-weight: 800;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 50px rgba(0, 242, 254, 0.6);
+        }
+
+        /* Animação de entrada */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="container">
+        <div class="title-wrapper reveal">
+            <h1 id="scramble-text">DEVELOPER PRO</h1>
+            <p class="subtitle">Especialista em criar experiências digitais de alto impacto. Código limpo, performance extrema e disponibilidade 24/7.</p>
+        </div>
+
+        <div class="grid reveal" style="animation-delay: 0.3s;">
+            <div class="card" onmousemove="handleTilt(event, this)" onmouseleave="resetTilt(this)">
+                <h3>FULL DISPONIBILIDADE</h3>
+                <p>Resposta rápida não é um diferencial, é minha obrigação. Estou online quando você precisa.</p>
+            </div>
+            <div class="card" onmousemove="handleTilt(event, this)" onmouseleave="resetTilt(this)">
+                <h3>CÓDIGO MODERNO</h3>
+                <p>HTML5, CSS3 avançado e JavaScript puro ou frameworks. Tudo otimizado para ser leve.</p>
+            </div>
+            <div class="card" onmousemove="handleTilt(event, this)" onmouseleave="resetTilt(this)">
+                <h3>FOCO NO NEGÓCIO</h3>
+                <p>Eu entendo o seu problema e busco a solução técnica mais inteligente para o seu projeto crescer.</p>
+            </div>
+        </div>
+
+        <div class="btn-wrap reveal" style="animation-delay: 0.6s;">
+            <a href="#" class="btn">Me Contrate Agora</a>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Sistema de Partículas (Background) ---
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(0, 242, 254, 0.3)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function createParticles() {
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        initCanvas();
+        createParticles();
+        animate();
+        window.addEventListener('resize', initCanvas);
+
+        // --- 2. Efeito Scramble (Texto Decodificando) ---
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let interval = null;
+
+        function scramble(element) {
+            let iteration = 0;
+            clearInterval(interval);
+            const originalText = element.innerText;
+            
+            interval = setInterval(() => {
+                element.innerText = element.innerText
+                .split("")
+                .map((letter, index) => {
+                    if(index < iteration) return originalText[index];
+                    return letters[Math.floor(Math.random() * 26)]
+                })
+                .join("");
+                
+                if(iteration >= originalText.length) clearInterval(interval);
+                iteration += 1 / 3;
+            }, 30);
+        }
+
+        window.onload = () => scramble(document.getElementById('scramble-text'));
+
+        // --- 3. Efeito Tilt 3D nos Cards ---
+        function handleTilt(e, card) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = (y - centerY) / 10;
+            const rotateY = (centerX - x) / 10;
+            
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        }
+
+        function resetTilt(card) {
+            card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+        }
+    </script>
+</body>
+</html>
