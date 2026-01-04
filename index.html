@@ -45,11 +45,9 @@
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        /* Classe para esconder as seções */
         .hidden {
             display: none !important;
             opacity: 0;
-            pointer-events: none;
         }
 
         .title-wrapper {
@@ -93,9 +91,7 @@
             cursor: pointer;
         }
 
-        .card:hover {
-            border-color: var(--primary);
-        }
+        .card:hover { border-color: var(--primary); }
 
         .card h3 {
             font-size: 1.5rem;
@@ -126,7 +122,6 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             transition: 0.3s;
-            overflow: hidden;
             display: inline-block;
             border: none;
             cursor: pointer;
@@ -135,18 +130,6 @@
         .btn:hover {
             transform: scale(1.05);
             box-shadow: 0 0 50px rgba(0, 242, 254, 0.6);
-        }
-
-        /* Estilo da Seção de Agradecimento */
-        #thanks-section {
-            text-align: center;
-            max-width: 600px;
-        }
-
-        #thanks-section h2 {
-            font-size: 4rem;
-            color: var(--primary);
-            margin-bottom: 20px;
         }
 
         .reveal {
@@ -191,15 +174,14 @@
     </div>
 
     <div id="thanks-section" class="container hidden">
-        <h2 id="scramble-thanks">OBRIGADO!</h2>
-        <p class="subtitle">Sua solicitação foi recebida com sucesso. Prepare-se para elevar o nível do seu projeto. Entrarei em contato em breve.</p>
+        <h1 id="scramble-thanks" style="font-size: clamp(3rem, 10vw, 7rem);">OBRIGADO!</h1>
         <div class="btn-wrap">
-            <a href="javascript:location.reload()" class="btn" style="background: transparent; color: white; border: 1px solid white;">Voltar</a>
+            <button onclick="location.reload()" class="btn" style="background: transparent; color: white; border: 1px solid white;">Voltar</button>
         </div>
     </div>
 
     <script>
-        // --- 1. Sistema de Partículas ---
+        // --- 1. Background de Partículas ---
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -218,12 +200,9 @@
                 this.speedY = Math.random() * 1 - 0.5;
             }
             update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x > canvas.width) this.x = 0;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.y > canvas.height) this.y = 0;
-                if (this.y < 0) this.y = canvas.height;
+                this.x += this.speedX; this.y += this.speedY;
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
             }
             draw() {
                 ctx.fillStyle = 'rgba(0, 242, 254, 0.3)';
@@ -233,40 +212,24 @@
             }
         }
 
-        function createParticles() {
-            particles = [];
-            for (let i = 0; i < 100; i++) {
-                particles.push(new Particle());
-            }
-        }
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
+            particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animate);
         }
-
-        initCanvas();
-        createParticles();
-        animate();
+        initCanvas(); animate();
         window.addEventListener('resize', initCanvas);
 
-        // --- 2. Função de Transição para Agradecimento ---
+        // --- 2. Troca de Tela ---
         function showThanks() {
             const main = document.getElementById('main-content');
             const thanks = document.getElementById('thanks-section');
-
-            // Fade out
             main.style.opacity = '0';
-            main.style.transform = 'translateY(-20px)';
-            
             setTimeout(() => {
                 main.classList.add('hidden');
                 thanks.classList.remove('hidden');
-                // Aplica o efeito de scramble no título de agradecimento
                 scramble(document.getElementById('scramble-thanks'));
             }, 500);
         }
@@ -277,14 +240,10 @@
             let iteration = 0;
             const originalText = element.innerText;
             const interval = setInterval(() => {
-                element.innerText = element.innerText
-                .split("")
-                .map((letter, index) => {
-                    if(index < iteration) return originalText[index];
-                    return letters[Math.floor(Math.random() * 26)]
-                })
-                .join("");
-                
+                element.innerText = element.innerText.split("").map((l, i) => {
+                    if(i < iteration) return originalText[i];
+                    return letters[Math.floor(Math.random() * 26)];
+                }).join("");
                 if(iteration >= originalText.length) clearInterval(interval);
                 iteration += 1 / 3;
             }, 30);
@@ -292,21 +251,14 @@
 
         window.onload = () => scramble(document.getElementById('scramble-text'));
 
-        // --- 4. Efeito Tilt 3D ---
+        // --- 4. Efeito Tilt ---
         function handleTilt(e, card) {
             const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = (y - centerY) / 10;
-            const rotateY = (centerX - x) / 10;
-            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            const x = (e.clientX - rect.left) - rect.width / 2;
+            const y = (e.clientY - rect.top) - rect.height / 2;
+            card.style.transform = `rotateX(${-y / 10}deg) rotateY(${x / 10}deg)`;
         }
-
-        function resetTilt(card) {
-            card.style.transform = `rotateX(0deg) rotateY(0deg)`;
-        }
+        function resetTilt(card) { card.style.transform = `rotateX(0deg) rotateY(0deg)`; }
     </script>
 </body>
 </html>
